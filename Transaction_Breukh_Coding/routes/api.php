@@ -36,3 +36,4 @@ Route::delete('compte/{id}',[CompteController::class,'supprimerCompte']);
 //Route pour Effectuer une transaction
 Route::post('user/{id}/transaction/depot',[TransactionController::class,'depot']);
 Route::post('transaction/user/{id}/retrait',[TransactionController::class,'retrait']);
+Route::post('transaction/user/{id}/envoie',[TransactionController::class,'envoie']);

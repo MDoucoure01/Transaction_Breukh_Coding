@@ -20,7 +20,7 @@ class TransactionController extends Controller
     public function depot(Request $request)
     {
         $valided = Validator::make($request->all(),[
-            'fournisseur' => 'required',
+            'fournisseur' => 'required|in:OrangeMoney,Wave,Compte Banquaire,Wari',
             'expediteur_id' => 'required|exists:comptes,id',
             'destinataire_id' => 'required|exists:users,id',
             'montant' => 'required|numeric|min:500',
@@ -31,7 +31,7 @@ class TransactionController extends Controller
             return Response(["message" => $valided->errors()],401);
         }
 
-        $compte = Compte::where('id',$request->id)
+        $compte = Compte::where('user_id',$request->id)
         ->where('fournisseur',$request->fournisseur)
         ->first();
 
@@ -59,7 +59,7 @@ class TransactionController extends Controller
     public function retrait(Request $request)
     {
         $valided = Validator::make($request->all(),[
-            'fournisseur' => 'required',
+            'fournisseur' => 'required|in:OrangeMoney,Wave,Compte Banquaire,Wari',
             'montant' => 'required|numeric|min:500',
             'type' => 'required'
         ]);
@@ -70,7 +70,7 @@ class TransactionController extends Controller
 
         if ($request->type == 'retrait') {
             
-            $compte = Compte::where('id',$request->id)
+            $compte = Compte::where('user_id',$request->id)
             ->where('fournisseur',$request->fournisseur)
             ->first();
 
@@ -79,7 +79,7 @@ class TransactionController extends Controller
                 return ['utilisateur_id' => 'Le compte de l\'utilisateur n\'existe pas Ou le fournisseur n\'existe pas'];
             }
 
-            if ($compte->solde > $request->montant) {
+            if ($compte->solde >= $request->montant) {
 
                 $compte->solde -= $request->montant;
                 $compte->save();
@@ -100,6 +100,65 @@ class TransactionController extends Controller
             return [ "message" => "Montant Insuffisant"];
         }
         return [ "message" => "Transaction No effecteur veillez regarder les parapmetres"];
+    }
+
+    public function envoie(Request $request)
+    {
+        $valided = Validator::make($request->all(),[
+            'fournisseur' => 'required|in:OrangeMoney,Wave,Compte Banquaire,Wari',
+            'expediteur_id' => 'required|exists:comptes,id',
+            'destinataire_id' => 'required|exists:users,id',
+            'montant' => 'required|numeric|min:500',
+            'type' => 'required'
+        ]);
+
+        if ($valided->fails()) {
+            return Response(["message" => $valided->errors()],401);
+        } 
+
+        if ($request->type == 'transfert compte') {
+
+            $compte = Compte::where('user_id',$request->expediteur_id)
+            ->where('fournisseur',$request->fournisseur)
+            ->first();
+
+            // return $compte;
+            if (!$compte) {
+                return ['utilisateur_id' => 'Le compte de l\'utilisateur n\'existe pas Ou le fournisseur n\'existe pas'];
+            }
+
+            $dest = Compte::where('user_id',$request->destinataire_id)
+            ->where('fournisseur',$request->fournisseur)
+            ->first();
+
+            if (!$dest) {
+                return ['utilisateur_id' => 'Le compte du destinataire n\'existe pas Ou le fournisseur n\'existe pas'];
+            }
+            
+            // return $compte->solde;
+            if ($compte->solde >= $request->montant) {
+
+                $compte->solde -= $request->montant;
+                $compte->save();
+
+                $dest->solde += $request->montant;
+                $dest->save();
+
+                $retrait = Transaction::create([
+                    'expediteur_id' => $request->expediteur_id,
+                    'destinataire_id' => $request->destinataire_id,
+                    'montant' => $request->montant,
+                    'type' => $request->type
+                ]);
+
+                return [ 
+                    "message" => "votre nouveau solde est de " . $compte->solde,
+                    "transaction" => $retrait
+                ];
+            }
+            return [ "message" => "Montant Insuffisant pour effectuer un envoyer"];
+        }
+        return [ "message" => "Transaction No effecteur veillez regarder le type de transaction"];
     }
     /**
      * Store a newly created resource in storage.
