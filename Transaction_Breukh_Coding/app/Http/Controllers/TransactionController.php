@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Validator;
+use App\Models\User;
 use App\Models\Compte;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
@@ -21,8 +22,8 @@ class TransactionController extends Controller
     {
         $valided = Validator::make($request->all(),[
             'fournisseur' => 'required|in:OrangeMoney,Wave,Compte Banquaire,Wari',
-            'expediteur_id' => 'required|exists:comptes,id',
-            'destinataire_id' => 'required|exists:users,id',
+            'expediteur' => 'required',
+            'destinataire' => 'required',
             'montant' => 'required|numeric|min:500',
             'type' => 'required'
         ]);
@@ -31,26 +32,49 @@ class TransactionController extends Controller
             return Response(["message" => $valided->errors()],401);
         }
 
-        $compte = Compte::where('user_id',$request->id)
-        ->where('fournisseur',$request->fournisseur)
+        $expediteur = User::where('telephone',$request->expediteur)
         ->first();
-
-        if (!$compte) {
-            return ['utilisateur_id' => 'Le compte de l\'utilisateur n\'existe pas Ou le fournisseur n\'existe pas'];
+        if (!$expediteur) {
+            return ['utilisateur_id' => 'Le compte de l\'expediteur n\'existe pas Ou le fournisseur n\'existe pas'];
         }
 
-        $compte->solde += $request->montant;
-        $compte->save();
+        $destinataire = User::where('telephone',$request->destinataire)
+        ->first();
+
+        if (!$destinataire) {
+            return ['utilisateur_id' => 'Le compte du destinataire n\'existe pas Ou le fournisseur n\'existe pas'];
+        }
+
+        $compteDestinataire = Compte::where('user_id',$destinataire->id)
+        ->where('fournisseur',$request->fournisseur)
+        ->first();
+        // return $compteDestinataire;
+
+        if (!$compteDestinataire) {
+            return ['utilisateur_id' => 'Le compte du destinataire n\'existe pas dans cette Operateur Ou le fournisseur n\'existe pas'];
+        }
+
+        // return $compteDestinataire;
+        // $compte = Compte::where('user_id',$request->id)
+        // ->where('fournisseur',$request->fournisseur)
+        // ->first();
+
+        // if (!$compte) {
+        //     return ['utilisateur_id' => 'Le compte de l\'utilisateur n\'existe pas Ou le fournisseur n\'existe pas'];
+        // }
+
+        $compteDestinataire->solde += $request->montant;
+        $compteDestinataire->save();
 
         $depot = Transaction::create([
-            'expediteur_id' => $request->expediteur_id,
-            'destinataire_id' => $request->destinataire_id,
+            'expediteur_id' => $expediteur->id,
+            'destinataire_id' => $compteDestinataire->id,
             'montant' => $request->montant,
             'type' => $request->type
         ]);
 
         return [ 
-            "message" => "votre nouveau solde est de " . $compte->solde,
+            "message" => "votre nouveau solde est de " . $compteDestinataire->solde,
             "transaction" => $depot
         ];
         
@@ -59,6 +83,7 @@ class TransactionController extends Controller
     public function retrait(Request $request)
     {
         $valided = Validator::make($request->all(),[
+            'destinataire' => 'required',
             'fournisseur' => 'required|in:OrangeMoney,Wave,Compte Banquaire,Wari',
             'montant' => 'required|numeric|min:500',
             'type' => 'required'
@@ -69,35 +94,46 @@ class TransactionController extends Controller
         }
 
         if ($request->type == 'retrait') {
-            
-            $compte = Compte::where('user_id',$request->id)
+
+            $expediteur = User::where('telephone',$request->destinataire)
+            ->first();
+
+            if (!$expediteur) {
+                return ['utilisateur_id' => 'Le compte n\'existe pas Ou le fournisseur n\'existe pas'];
+            }
+    
+            $compteDestinataire = Compte::where('user_id',$expediteur->id)
             ->where('fournisseur',$request->fournisseur)
             ->first();
 
-
-            if (!$compte) {
-                return ['utilisateur_id' => 'Le compte de l\'utilisateur n\'existe pas Ou le fournisseur n\'existe pas'];
+            if (!$compteDestinataire) {
+                return ['utilisateur_id' => 'Le compte du destinataire n\'existe pas Ou le fournisseur n\'existe pas'];
             }
 
-            if ($compte->solde >= $request->montant) {
-
-                $compte->solde -= $request->montant;
-                $compte->save();
-
+            
+            if ($compteDestinataire->solde >= $request->montant) {
+                
+                $compteDestinataire->solde -= $request->montant;
+                $compteDestinataire->save();
+                
+                
                 $retrait = Transaction::create([
-                    'expediteur_id' => $request->id,
-                    'destinataire_id' => $request->id,
+                    'expediteur_id' => $expediteur->id,
+                    'destinataire_id' => $compteDestinataire->id,
                     'montant' => $request->montant,
                     'type' => $request->type
                 ]);
-
+    
                 return [ 
-                    "message" => "votre nouveau solde est de " . $compte->solde,
+                    "message" => "votre nouveau solde est de " . $compteDestinataire->solde,
                     "transaction" => $retrait
                 ];
-
+    
+                
             }
             return [ "message" => "Montant Insuffisant"];
+
+
         }
         return [ "message" => "Transaction No effecteur veillez regarder les parapmetres"];
     }

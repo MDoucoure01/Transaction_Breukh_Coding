@@ -16,6 +16,22 @@ class UserController extends Controller
         return User::all();
     }
 
+
+    public function charge(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'telephone' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return Response(['message' => $validator->errors()],401);
+        }
+
+        $user = User::where('telephone',$request->telephone)
+        ->first();
+
+        return ["nomComplet" => $user->prenom.' '.$user->nom];
+    }
     /**
      * Store a newly created resource in storage.
      */

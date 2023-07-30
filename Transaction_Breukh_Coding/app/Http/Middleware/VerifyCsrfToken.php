@@ -14,4 +14,8 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         //
     ];
+
+    protected $middleware = [
+        CorsMiddleware::class
+    ];
 }

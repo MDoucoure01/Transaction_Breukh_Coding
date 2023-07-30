@@ -14,8 +14,8 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('expediteur_id')->constrained('comptes');
-            $table->foreignId('destinataire_id')->constrained('users');
+            $table->foreignId('expediteur_id');
+            $table->foreignId('destinataire_id');
             $table->enum('type',['depot','retrait','transfert compte','transfert code']);
             $table->decimal('montant');
             $table->timestamp('date')->useCurrent();

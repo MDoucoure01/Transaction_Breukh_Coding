@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: var(--grey);
+        }
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 1em;
+            text-align: center;
+        }
+
+        .form-control {
+            width: 30%;
+        }
+    </style>
+    <title>Transaction</title>
+</head>
+
+<body>
+    <div class="container d-flex justify-content-center align-items-center"
+        style="height: 100vh;background: rgb(43,59,138);background: rgb(187,222,240);background: linear-gradient(90deg, rgba(187,222,240,1) 20%, rgba(43,59,138,0.3981967787114846) 49%, rgba(0,0,0,1) 80%);box-shadow: -4px -1px 21px -7px rgba(0,0,0,0.75);">
+        <div class="transaction-block" style="width: 70%;">
+            <div class="company-name">BREUKH TRANSFERT CODING</div>
+            <label for="expediteur" class="fs-4">Expéditeur:</label>
+            <hr>
+            <div class="form-group mb-2 align-items-center  d-flex justify-content-around">
+                <input type="number" id="expediteur" class="form-control" placeholder="Numéro de l'expéditeur">
+                <input type="text" class="form-control" id="nomComplete" placeholder="Nom de l'expéditeur">
+            </div>
+
+
+            <label for="expediteur" class="fs-4">Transaction:</label>
+            <hr>
+            <input type="number" id="Montant" class=" Montant form-control" placeholder="Montant" style="margin-left: 12em;width: 60%; ">
+            <div class="form-group mb-2 align-items-center d-flex justify-content-around mt-3 ecart">
+                <select class="form-control form-select form-select-lg mb-3" id="fournisseur" aria-label="Large select example">
+                    <option selected>Select Fournisseur</option>
+                    <option value="OrangeMoney">Orange Money</option>
+                    <option value="Wave">Wave</option>
+                    <option value="Wari">Wari</option>
+                    <option value="Compte Banquaire">Compte Banquaire</option>
+                </select>
+                <select class="form-control form-select form-select-lg mb-3" id="transaction" aria-label="Large select example">
+                    <option selected>Select Transaction</option>
+                    <option value="depot">Depot</option>
+                    <option value="retrait">Retrait</option>
+                    <option value="transfert compte">Transfert Compte</option>
+                    <option value="transfert code">Transfere Code</option>
+                </select>
+            </div>
+
+
+
+            <label for="expediteur" class="fs-4">Destinataire:</label>
+            <hr>
+            <div class="form-group mb-2 align-items-center d-flex justify-content-around">
+                <input type="number" id="destinataire" class="form-control" placeholder="Numéro du Destinataire">
+                <input type="text" class="form-control" id="NomDestinataire" placeholder="Nom de du Destinataire">
+            </div>
+
+            <button type="button" class="w-25 btn btn-outline-primary " id="envoyer" style="margin-left: 38%;">Primary</button>
+        </div>
+    </div>
+    <script src="Front_Transaction_Breukh_Coding/dist/Transaction.js"></script>
+</body>
+
+</html>
