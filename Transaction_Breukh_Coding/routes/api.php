@@ -41,3 +41,6 @@ Route::post('transaction/user/{id}/envoie',[TransactionController::class,'envoie
 
 //Route pour charger un user
 Route::post('user/charge',[UserController::class,'charge']);
+
+//Route pour charger l'historique d'user
+Route::post('transaction/user/historique',[TransactionController::class,'chargeHistorique']);

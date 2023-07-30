@@ -7,10 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
     <style>
         body {
             background-color: var(--grey);
         }
+
         .company-name {
             font-size: 24px;
             font-weight: bold;
@@ -21,53 +26,103 @@
         .form-control {
             width: 30%;
         }
+
+        i:hover {
+            color: green;
+        }
     </style>
     <title>Transaction</title>
 </head>
 
 <body>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Historque Du client</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body ModalHistorique d-flex flex-column">
+                    <div>
+                        <label for="expediteur" class="fs-4">Depot Faite:</label>
+                        <hr>
+                        <div class="form-group mb-2 align-items-center  d-flex justify-content-around">
+                            <label for="expediteur" class="fs-5">Montant: </label>
+                            <label for="expediteur" class="fs-5">Date: </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="expediteur" class="fs-4">Depot Faite:</label>
+                        <hr>
+                        <div class="form-group mb-2 align-items-center  d-flex justify-content-around">
+                            <label for="expediteur" class="fs-5">Montant: </label>
+                            <label for="expediteur" class="fs-5">Date: </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container d-flex justify-content-center align-items-center"
         style="height: 100vh;background: rgb(43,59,138);background: rgb(187,222,240);background: linear-gradient(90deg, rgba(187,222,240,1) 20%, rgba(43,59,138,0.3981967787114846) 49%, rgba(0,0,0,1) 80%);box-shadow: -4px -1px 21px -7px rgba(0,0,0,0.75);">
         <div class="transaction-block" style="width: 70%;">
             <div class="company-name">BREUKH TRANSFERT CODING</div>
-            <label for="expediteur" class="fs-4">Expéditeur:</label>
-            <hr>
-            <div class="form-group mb-2 align-items-center  d-flex justify-content-around">
-                <input type="number" id="expediteur" class="form-control" placeholder="Numéro de l'expéditeur">
-                <input type="text" class="form-control" id="nomComplete" placeholder="Nom de l'expéditeur">
+            <div class="" id="blocHaut">
+                <label for="expediteur" class="fs-4">Expéditeur:</label>
+                <hr>
+
+                <i class="bi bi-patch-exclamation" id="afficherHistorique" data-bs-toggle="modal" data-bs-target="#exampleModal"></i>
+                
+                <div class="form-group mb-2 align-items-center  d-flex justify-content-around">
+                    <input type="number" id="expediteur" class="form-control" placeholder="Numéro de l'expéditeur">
+                    <input type="text" class="form-control" id="nomComplete" placeholder="Nom de l'expéditeur">
+                </div>
             </div>
 
 
-            <label for="expediteur" class="fs-4">Transaction:</label>
-            <hr>
-            <input type="number" id="Montant" class=" Montant form-control" placeholder="Montant" style="margin-left: 12em;width: 60%; ">
-            <div class="form-group mb-2 align-items-center d-flex justify-content-around mt-3 ecart">
-                <select class="form-control form-select form-select-lg mb-3" id="fournisseur" aria-label="Large select example">
-                    <option selected>Select Fournisseur</option>
-                    <option value="OrangeMoney">Orange Money</option>
-                    <option value="Wave">Wave</option>
-                    <option value="Wari">Wari</option>
-                    <option value="Compte Banquaire">Compte Banquaire</option>
-                </select>
-                <select class="form-control form-select form-select-lg mb-3" id="transaction" aria-label="Large select example">
-                    <option selected>Select Transaction</option>
-                    <option value="depot">Depot</option>
-                    <option value="retrait">Retrait</option>
-                    <option value="transfert compte">Transfert Compte</option>
-                    <option value="transfert code">Transfere Code</option>
-                </select>
+            <div>
+                <label for="expediteur" class="fs-4">Transaction:</label>
+                <hr>
+                <input type="number" id="Montant" class=" Montant form-control" placeholder="Montant"
+                    style="margin-left: 12em;width: 60%; ">
+                <div class="form-group mb-2 align-items-center d-flex justify-content-around mt-3 ecart">
+                    <select class="form-control form-select form-select-lg mb-3" id="fournisseur"
+                        aria-label="Large select example">
+                        <option value="" selected>Select Fournisseur</option>
+                        <option value="OrangeMoney">Orange Money</option>
+                        <option value="Wave">Wave</option>
+                        <option value="Wari">Wari</option>
+                        <option value="Compte Banquaire">Compte Banquaire</option>
+                    </select>
+                    <select class="form-control form-select form-select-lg mb-3" id="transaction"
+                        aria-label="Large select example">
+                        <option selected>Select Transaction</option>
+                        <option value="depot">Depot</option>
+                        <option value="retrait">Retrait</option>
+                        <option value="transfert compte">Transfert Compte</option>
+                        <option value="transfert code">Transfere Code</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label for="expediteur" class="fs-4">Destinataire:</label>
+                <hr>
+                <div class="form-group mb-2 align-items-center d-flex justify-content-around">
+                    <input type="number" id="destinataire" class="form-control" placeholder="Numéro du Destinataire">
+                    <input type="text" class="form-control" id="NomDestinataire" placeholder="Nom de du Destinataire">
+                </div>
             </div>
 
 
-
-            <label for="expediteur" class="fs-4">Destinataire:</label>
-            <hr>
-            <div class="form-group mb-2 align-items-center d-flex justify-content-around">
-                <input type="number" id="destinataire" class="form-control" placeholder="Numéro du Destinataire">
-                <input type="text" class="form-control" id="NomDestinataire" placeholder="Nom de du Destinataire">
-            </div>
-
-            <button type="button" class="w-25 btn btn-outline-primary " id="envoyer" style="margin-left: 38%;">Primary</button>
+            <button type="button" class="w-25 btn btn-outline-primary " id="envoyer"
+                style="margin-left: 38%;">Envoyer</button>
         </div>
     </div>
     <script src="Front_Transaction_Breukh_Coding/dist/Transaction.js"></script>

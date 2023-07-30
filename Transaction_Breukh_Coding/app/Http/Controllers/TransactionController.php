@@ -196,6 +196,55 @@ class TransactionController extends Controller
         }
         return [ "message" => "Transaction No effecteur veillez regarder le type de transaction"];
     }
+
+
+    public function chargeHistorique(Request $request)
+    {
+        $valided = Validator::make($request->all(),[
+            'telephone' => 'required|numeric'
+        ]);
+        if ($valided->fails()) {
+            return Response(["message" => $valided->errors()],401);
+        } 
+        $user = User::where('telephone',$request->telephone)->first();
+
+        if (!$user) {
+            return Response(["message" => "User not found"]);
+        }
+
+        //dans le tableau
+        $userDepot = Transaction::where('expediteur_id',$user->id)
+        ->where('type',"depot")
+        ->get();
+        //dans le tableau
+        $userCode = Transaction::where('destinataire_id',$user->id)
+        ->where('type',"retait")
+        ->where('code','!=',null)
+        ->get();
+        
+        if ($request->fournisseur) {
+            $compteExiste = Compte::where('user_id',$user->id)
+            ->where('fournisseur',$request->fournisseur)
+            ->first();
+    
+            //dans le tableau
+            $userSansCode = Transaction::where('destinataire_id',$compteExiste->id)
+            ->where('code', null)
+            ->get();
+
+            // return $userCompteTransaction;
+            return [
+                "Fairedepot" => $userDepot,
+                "receptionViaCode" => $userCode,
+                "ReceptionClient" => $userSansCode
+            ];
+        }
+        return [
+            "Fairedepot" => $userDepot,
+            "receptionViaCode" => $userCode
+        ];
+
+    }
     /**
      * Store a newly created resource in storage.
      */

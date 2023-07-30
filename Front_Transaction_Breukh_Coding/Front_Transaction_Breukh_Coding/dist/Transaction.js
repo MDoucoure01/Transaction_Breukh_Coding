@@ -24,6 +24,7 @@ let transaction = document.getElementById("transaction");
 let destinataire = document.getElementById("destinataire");
 let NomDestinataire = document.getElementById("NomDestinataire");
 let Montant = document.getElementById("Montant");
+let blocHaut = document.getElementById('blocHaut');
 fournisseur.addEventListener('change', () => {
     const selectedFournisseur = fournisseur.value;
     if (selectedFournisseur === 'OrangeMoney') {
@@ -154,5 +155,99 @@ bouton.addEventListener('click', () => {
             .catch(error => {
             console.log(error);
         });
+    }
+});
+// Fonction pour créer la modal
+function createModal(data) {
+    const faireDepot = data.Fairedepot;
+    const receptionViaCode = data.receptionViaCode;
+    const receptionClient = data.ReceptionClient;
+    function createEntry(transaction) {
+        const entryDiv = document.createElement('div');
+        entryDiv.innerHTML = `
+        <label class="fs-5">Montant: ${transaction.montant}</label>
+        <label class="fs-5">Date: ${transaction.date}</label>
+        <hr>
+      `;
+        return entryDiv;
+    }
+    const modalBody = document.querySelector('.ModalHistorique');
+    modalBody.innerHTML = '';
+    faireDepot.forEach((transaction) => {
+        const entry = createEntry(transaction);
+        modalBody === null || modalBody === void 0 ? void 0 : modalBody.appendChild(entry);
+    });
+    receptionViaCode.forEach((transaction) => {
+        const entry = createEntry(transaction);
+        modalBody === null || modalBody === void 0 ? void 0 : modalBody.appendChild(entry);
+    });
+    receptionClient.forEach((transaction) => {
+        const entry = createEntry(transaction);
+        modalBody === null || modalBody === void 0 ? void 0 : modalBody.appendChild(entry);
+    });
+}
+let afficherHistorique = document.getElementById("afficherHistorique");
+let ModalHistorique = document.getElementById("modalHistorique");
+transaction.addEventListener('change', () => {
+    if (transaction.value == "retrait") {
+        blocHaut.classList.add('d-none');
+    }
+    else {
+        blocHaut.classList.remove('d-none');
+    }
+});
+afficherHistorique.addEventListener('click', () => {
+    if (expediteur.value.length == 9) {
+        let expdtr = expediteur.value;
+        let four = fournisseur.value;
+        if (fournisseur.value) {
+            const formData = new FormData();
+            formData.append('telephone', expdtr);
+            formData.append('fournisseur', four);
+            fetch('http://127.0.0.1:8000/api/transaction/user/historique', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                else {
+                    return response.json().then(errors => {
+                        console.log(errors);
+                    });
+                }
+            })
+                .then(data => {
+                createModal(data);
+            })
+                .catch(error => {
+                console.log(error);
+            });
+        }
+        else {
+            const formData = new FormData();
+            formData.append('telephone', expdtr);
+            fetch('http://127.0.0.1:8000/api/transaction/user/historique', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                else {
+                    return response.json().then(errors => {
+                        console.log(errors);
+                    });
+                }
+            })
+                .then(data => {
+                console.log(data);
+            })
+                .catch(error => {
+                console.log(error);
+            });
+        }
     }
 });
