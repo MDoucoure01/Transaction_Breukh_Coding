@@ -1,21 +1,4 @@
 "use strict";
-fetch('http://127.0.0.1:8000/api/user')
-    .then(response => {
-    if (!response.ok) {
-        throw new Error('Erreur de requête');
-    }
-    return response.json();
-})
-    .then(data => {
-    console.log(data);
-    // data.data.forEach(element => {
-    //     // console.log(element.libelle);
-    //     createOption(element.libelle, element.id)
-    // });
-})
-    .catch(error => {
-    console.error('Une erreur s\'est produite:', error);
-});
 let bouton = document.getElementById("envoyer");
 let expediteur = document.getElementById("expediteur");
 let nomComplete = document.getElementById("nomComplete");
@@ -72,7 +55,7 @@ expediteur.addEventListener('input', () => {
     }
 });
 destinataire.addEventListener('input', () => {
-    if (destinataire.value.length == 9) {
+    if (destinataire.value.length === 9) {
         const formData = new FormData();
         formData.append('telephone', destinataire.value);
         formData.append('_token', '{{ csrf_token() }}');
@@ -156,8 +139,30 @@ bouton.addEventListener('click', () => {
             console.log(error);
         });
     }
+    else if (type == "transfert compte") {
+        console.log(formData);
+        fetch('http://127.0.0.1:8000/api/transaction/user/1/envoie', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            else {
+                return response.json().then(errors => {
+                    console.log(errors);
+                });
+            }
+        })
+            .then(data => {
+            console.log(data);
+        })
+            .catch(error => {
+            console.log(error);
+        });
+    }
 });
-// Fonction pour créer la modal
 function createModal(data) {
     const faireDepot = data.Fairedepot;
     const receptionViaCode = data.receptionViaCode;
@@ -165,6 +170,7 @@ function createModal(data) {
     function createEntry(transaction) {
         const entryDiv = document.createElement('div');
         entryDiv.innerHTML = `
+        <label class="fs-5">Type: ${transaction.type}</label>
         <label class="fs-5">Montant: ${transaction.montant}</label>
         <label class="fs-5">Date: ${transaction.date}</label>
         <hr>

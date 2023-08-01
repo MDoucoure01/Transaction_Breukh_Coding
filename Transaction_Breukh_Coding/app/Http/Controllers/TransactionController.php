@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Compte;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class TransactionController extends Controller
 {
@@ -142,10 +143,13 @@ class TransactionController extends Controller
     {
         $valided = Validator::make($request->all(),[
             'fournisseur' => 'required|in:OrangeMoney,Wave,Compte Banquaire,Wari',
-            'expediteur_id' => 'required|exists:comptes,id',
-            'destinataire_id' => 'required|exists:users,id',
+            'expediteur' => 'required|exists:users,telephone',
+            'destinataire' => 'required|exists:users,telephone',
             'montant' => 'required|numeric|min:500',
-            'type' => 'required'
+            'type' => [
+                'required',
+                Rule::in(['transfert compte']),
+            ],
         ]);
 
         if ($valided->fails()) {
@@ -153,47 +157,70 @@ class TransactionController extends Controller
         } 
 
         if ($request->type == 'transfert compte') {
+            $UserExpediteur_id = User::where('telephone',$request->expediteur)->first();
+            $UserDestinataire_id = User::where('telephone',$request->destinataire)->first();
 
-            $compte = Compte::where('user_id',$request->expediteur_id)
+            $CompteExpediteur_id = Compte::where('user_id',$UserExpediteur_id->id)
+            ->where('fournisseur',$request->fournisseur)
+            ->first();
+            $CompteDestinataire_id = Compte::where('user_id',$UserDestinataire_id->id)
             ->where('fournisseur',$request->fournisseur)
             ->first();
 
-            // return $compte;
-            if (!$compte) {
-                return ['utilisateur_id' => 'Le compte de l\'utilisateur n\'existe pas Ou le fournisseur n\'existe pas'];
+            if (!$CompteExpediteur_id || !$CompteDestinataire_id) {
+                return [ "message" => "Un(1) de ses numero n'a pas de Compte Sur se fournisseur il est conseiller de faire le transfert par code." ];
             }
 
-            $dest = Compte::where('user_id',$request->destinataire_id)
-            ->where('fournisseur',$request->fournisseur)
-            ->first();
-
-            if (!$dest) {
-                return ['utilisateur_id' => 'Le compte du destinataire n\'existe pas Ou le fournisseur n\'existe pas'];
+            if ($CompteExpediteur_id->id == $CompteDestinataire_id->id) {
+                return [ "message" => "Impossible Vous voulez effectuer une Un Envoie sur le meme Numero" ];
             }
-            
-            // return $compte->solde;
-            if ($compte->solde >= $request->montant) {
 
-                $compte->solde -= $request->montant;
-                $compte->save();
 
-                $dest->solde += $request->montant;
-                $dest->save();
-
-                $retrait = Transaction::create([
-                    'expediteur_id' => $request->expediteur_id,
-                    'destinataire_id' => $request->destinataire_id,
-                    'montant' => $request->montant,
-                    'type' => $request->type
-                ]);
-
-                return [ 
-                    "message" => "votre nouveau solde est de " . $compte->solde,
-                    "transaction" => $retrait
-                ];
-            }
-            return [ "message" => "Montant Insuffisant pour effectuer un envoyer"];
+            $fraisPourcentage = 0;
+            switch ($request->fournisseur) {
+            case 'OrangeMoney':
+            case 'Wave':
+                $fraisPourcentage = 0.01;
+                break;
+            case 'Wari':
+                $fraisPourcentage = 0.02;
+                break;
+            case 'Compte Banquaire':
+                $fraisPourcentage = 0.05;
+                break;
+            default:
+            return response(["message" => "Fournisseur inconnu ou non spécifié"], 400);
         }
+
+        $frais = $request->montant * $fraisPourcentage;
+
+        $montantTotal = $request->montant + $frais;
+
+        // return $montantTotal;
+        
+        // return $CompteExpediteur_id->solde;
+        if ($CompteExpediteur_id->solde >= $montantTotal) {
+
+            $CompteExpediteur_id->solde -= $montantTotal;
+            $CompteExpediteur_id->save();
+
+            $CompteDestinataire_id->solde += $request->montant;
+            $CompteDestinataire_id->save();
+
+            $retrait = Transaction::create([
+                'expediteur_id' => $CompteExpediteur_id->id,
+                'destinataire_id' => $CompteDestinataire_id->id,
+                'montant' => $request->montant,
+                'type' => $request->type
+            ]);
+
+            return [ 
+                "message" => "votre nouveau solde est de " . $CompteExpediteur_id->solde,
+                "transaction" => $retrait
+            ];
+        }
+        return [ "message" => "Montant Insuffisant pour effectuer un envoyer"];
+    }
         return [ "message" => "Transaction No effecteur veillez regarder le type de transaction"];
     }
 
